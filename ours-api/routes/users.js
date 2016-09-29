@@ -1,5 +1,6 @@
 ﻿var express = require('express');
 var router = express.Router();
+var userDao = require('../models/user');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -7,9 +8,21 @@ router.get('/', function(req, res, next) {
 });
 
 /* 用户登录接口*/
+router.get('/login', function(req, res, next) {
+	var username = req.query.username;
+	userDao.getUserByUsername(username, function(err, result) {
+		res.json(result);
+	});
+});
+
+/* 用户登录接口*/
 router.post('/login', function(req, res, next) {
+	var username = req.body.username;
 	console.log('username = ' + req.body.username);
 	console.log('password = ' + req.body.password);
+	
+	userDao.getUserByUsername(username);
+	
 	res.json('{"hello": "world"}');
 });
 
