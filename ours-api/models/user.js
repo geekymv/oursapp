@@ -24,7 +24,7 @@ User.getUserByUsername = function(username, callback) {
 	});
 };
 //connection.end();
-
+// 导出模块
 module.exports = User;
 
 
