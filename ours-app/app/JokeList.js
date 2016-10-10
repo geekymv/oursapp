@@ -1,4 +1,4 @@
-'use strict'
+﻿'use strict'
 import React, { Component } from 'react';
 import {
 	Image,
@@ -44,7 +44,7 @@ class JokeList extends Component {
 
 	renderLodingView() {
 		return (
-			<View>
+			<View style={styles.loading}>
 				<Text>正在加载数据...</Text>
 			</View>
 		);
@@ -142,6 +142,11 @@ const styles = StyleSheet.create({
 		color: '#2BB2A3',
 		marginLeft: 6,
 	},
+	loading: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+	}
 });
 
 export default JokeList
