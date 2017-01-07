@@ -9,6 +9,7 @@ import {
 	PixelRatio,
 	Alert,
 	TouchableOpacity,
+	RefreshControl,
 	
 } from 'react-native';
 
@@ -18,6 +19,7 @@ class JokeList extends Component {
 	constructor(props) {
 		super(props);	
 		this.state = {
+			isRefreshing: false,
 			dataSource: new ListView.DataSource({
 				rowHasChanged: (row1, row2)=> row1 != row2,
 			}),
@@ -73,7 +75,15 @@ class JokeList extends Component {
 		);
 	}
 	
-	
+	_onRefresh() {
+		this.setState({isRefreshing: true});
+		var i = Math.random() * 2 + 1; // [0, 1) * 2 = [0, 2)
+		setTimeout(() => {
+			this.fetchData();
+			this.setState({isRefreshing: false});
+		}, i * 1000);
+		
+	}
 
 	render() {
 		if(!this.state.loaded) {
@@ -86,7 +96,19 @@ class JokeList extends Component {
 				dataSource={this.state.dataSource}
 				renderRow={this.renderMovie}
 				style={styles.listView}
-			/>	
+				enableEmptySections={true}
+				refreshControl = {
+					<RefreshControl
+					refreshing={this.state.isRefreshing}
+					onRefresh={this._onRefresh.bind(this)}
+					tintColor='#ff0000'
+					colors={['#ff0000', '#00ff00', '#0000ff']}
+					title={this.state.isRefreshing ? '刷新中' : '下拉刷新'}
+					progressBackgroundColor='#ffff00'
+					/>
+				}
+			/>
+				
 		);
   }
 }
