@@ -2,6 +2,11 @@
  * 用户登录模块实现	
  */
 'use strict'
+
+/*	<Image style={styles.bottomImgStyle} source={require('./img/login_large_ic.png')} />
+	上面这种方式打包后显示不出来图片
+	http://richardcao.me/2015/11/24/React-native-Android-%E5%88%9D%E6%AC%A1%E8%B8%A9%E5%9D%91%E4%B9%8B%E6%97%85/
+*/
  
 import React, { Component } from 'react';
 import {
@@ -20,6 +25,7 @@ import {
 const {height, width} = Dimensions.get('window');
 
 import JokeList from './JokeList';
+import Regist from './Regist';
 
 
 // http://www.lcode.org/%E3%80%90react-native%E5%BC%80%E5%8F%91%E3%80%91react-native%E6%8E%A7%E4%BB%B6%E4%B9%8Btextinput%E7%BB%84%E4%BB%B6%E8%AE%B2%E8%A7%A3%E4%B8%8Eqq%E7%99%BB%E5%BD%95%E7%95%8C%E9%9D%A2%E5%AE%9E%E7%8E%B011/
@@ -80,6 +86,20 @@ class Login extends Component {
 		});
 		
 	}
+	
+	_regist() {
+		const navigator = this.props.navigator;
+		if(navigator) {
+			navigator.push({
+				name: 'Regist',
+				component: Regist,
+				params: {
+					id: '123'
+				}
+			});
+		}
+	//	Alert.alert('注册');	
+	}
 
 	render() {
 		return(
@@ -112,9 +132,22 @@ class Login extends Component {
 					<Text style={{color:'#fff'}} >登录</Text>
 				</TouchableOpacity>
 				</View>
+			
 				<View style={styles.welcome}>
-					 <Image style={styles.bottomImgStyle} source={require('./img/login_large_ic.png')} />
+					<Image style={styles.bottomImgStyle} source={{uri:'http://115.28.145.105:3000/images/login_large_ic.png'}} />
 				</View>	
+				
+				<View style={{flexDirection: 'row', flex:1, alignSelf:'stretch', }}>
+					<View style={{alignSelf:'flex-end', marginLeft: 10, marginBottom: 10}}>
+						<Text>无法登录？</Text>
+					</View>
+					<View style={{alignSelf:'flex-end', marginLeft: 220, marginBottom: 10, marginRight: 20,}}>
+						<TouchableOpacity onPress={this._regist.bind(this)} >
+							<Text>新用户注册</Text>
+						</TouchableOpacity>
+						
+					</View>
+				</View>
 			</View>
 		);
 	
@@ -126,6 +159,7 @@ const styles = StyleSheet.create({
 	container: {
 		backgroundColor: '#FAFAFA',
 		flex: 1,
+		flexDirection: 'column',
 	},
 	login: {
 	//	backgroundColor: 'gray',
