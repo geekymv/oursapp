@@ -1,0 +1,177 @@
+﻿'use strict'
+import React, { Component } from 'react';
+import {
+	Image,
+	StyleSheet,
+	Text,
+	View,
+	ListView,
+	PixelRatio,
+	Alert,
+	TouchableOpacity,
+	RefreshControl,
+	
+} from 'react-native';
+
+import API from './API';
+
+var ARTICLE_LIST_URL = API.article_list_url;
+
+class ArticleList extends Component {
+	constructor(props) {
+		super(props);	
+		this.state = {
+			isRefreshing: false,
+			dataSource: new ListView.DataSource({
+				rowHasChanged: (row1, row2)=> row1 != row2,
+			}),
+			loaded: false,
+		};
+		// http://bbs.reactnative.cn/topic/901/listview%E9%80%89%E6%B8%B2%E6%9F%93%E7%9A%84%E7%BB%84%E4%BB%B6%E9%87%8C%E9%9D%A2%E7%9A%84touchableopacity-onpress%E8%B0%83%E7%94%A8%E6%96%B9%E6%B3%95-%E5%87%BA%E7%8E%B0%E9%97%AE%E9%A2%98null-is-an-not-object
+		// ListView选渲染的组件里面的TouchableOpacity onPress调用方法 出现问题null is an not object
+		this.renderMovie = this.renderMovie.bind(this);
+	}
+	componentDidMount() {
+		this.fetchData();
+	}
+	fetchData() {
+		fetch(ARTICLE_LIST_URL)
+			.then((response)=> response.json())
+			.then((responseData)=> {
+				this.setState({
+					dataSource: this.state.dataSource.cloneWithRows(responseData),
+					loaded: true,
+				});
+			})
+			.done();
+	}
+
+	renderLodingView() {
+		return (
+			<View style={styles.loading}>
+				<Text>正在加载数据...</Text>
+			</View>
+		);
+	}
+
+	jokeDetail(content) {
+		Alert.alert('段子详情', content);	
+	}
+	
+	renderMovie(joke) {
+	//	joke = joke.group;
+		return (
+			<TouchableOpacity onPress={this.jokeDetail.bind(this, joke.content)}>
+			<View style={[styles.container, styles.item]}>
+				<View style={styles.img_view}>
+				<Image source={{uri:joke.avatar_url}} style={styles.thumbnail} />
+				</View>
+				<View style={styles.rightContainer}>
+					<View style={[styles.row, styles.item_top]}>
+						<Text style={styles.name}>{joke.username}</Text>
+					</View>
+					<Text style={styles.content}>{joke.content}</Text>
+				</View>			
+			</View>
+			</TouchableOpacity>
+		);
+	}
+	
+	_onRefresh() {
+		this.setState({isRefreshing: true});
+		var i = Math.random() * 2 + 1; // [0, 1) * 2 = [0, 2)
+		setTimeout(() => {
+			this.fetchData();
+			this.setState({isRefreshing: false});
+		}, i * 1000);
+		
+	}
+
+	render() {
+		if(!this.state.loaded) {
+			return this.renderLodingView();
+		}
+		// http://www.wangchenlong.org/2016/04/26/1604/261-rn-es6-class/#more
+		// renderRow={this.renderMovie.bind(this)}
+		return(
+			
+			<ListView
+				dataSource={this.state.dataSource}
+				renderRow={this.renderMovie}
+				style={styles.listView}
+				enableEmptySections={true}
+				refreshControl = {
+					<RefreshControl
+					refreshing={this.state.isRefreshing}
+					onRefresh={this._onRefresh.bind(this)}
+					tintColor='#ff0000'
+					colors={['#ff0000', '#00ff00', '#0000ff']}
+					title={this.state.isRefreshing ? '刷新中' : '下拉刷新'}
+					progressBackgroundColor='#ffff00'
+					/>
+				}
+			/>
+				
+		);
+  }
+}
+
+const styles = StyleSheet.create({
+	row:{
+		flexDirection:'row'
+	},
+	item: {
+	//	borderTopWidth:1 / PixelRatio.get(),
+	//	borderBottomWidth:1 / PixelRatio.get(),
+	//	borderColor: '#ccc',
+	//	marginBottom: 10,
+		borderBottomColor: '#e0e0e0',
+		borderBottomWidth: 1,
+	},
+	container: {
+		flex: 1,
+		flexDirection: 'row',
+	//	justifyContent: 'center',
+	//	alignItems: 'center',
+	//	backgroundColor: '#F5FCFF',
+		marginLeft: 10,
+		marginRight: 10,
+	},
+	img_view: {
+	//	justifyContent: 'flex-start',
+		marginTop: 5,
+		marginBottom: 5,
+	},
+	thumbnail: {
+		width: 46,
+		height: 46,
+//		borderRadius: 40,
+		alignSelf: 'flex-start',
+	},
+	rightContainer: {
+		flex: 1,
+		marginLeft: 2,
+	//	backgroundColor: '#ff8f45',
+	},
+	content: {
+		fontSize: 15,
+		color: '#000000',
+		marginBottom: 5,
+		marginLeft: 6,
+		textAlign: 'left'
+	},
+	item_top: {
+	//	backgroundColor: '#abc'
+	},
+	name: {
+		color: '#2BB2A3',
+		marginLeft: 6,
+	},
+	loading: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+	}
+});
+
+export default ArticleList;

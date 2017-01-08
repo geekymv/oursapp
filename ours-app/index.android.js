@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
   },
 });
 
-import main from './app/main'
+import main from './app/main';
+import TabBar from './app/TabBar';
 
 AppRegistry.registerComponent('MyProject', () => main);

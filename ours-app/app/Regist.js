@@ -15,6 +15,12 @@ import {
   Navigator,
 } from 'react-native';
 
+// const REGIST_URL = 'http://192.168.0.102:3000/users/regist';
+const REGIST_URL = 'http://115.28.145.105/users/regist';
+
+import Login from './Login';
+//import API from './API';
+
 class Regist extends Component {
 	constructor(props) {
 		super(props);
@@ -47,7 +53,7 @@ class Regist extends Component {
 			return;
 		}
 		
-		fetch('http://115.28.145.105:3000/users/regist', 
+		fetch(REGIST_URL, 
 		{	method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -57,17 +63,25 @@ class Regist extends Component {
 		.then((responseJson) => {
 		//	Alert.alert(JSON.stringify(responseJson) );	
 			//  注册成功
+			if(responseJson.code !== 1) {
+				Alert.alert('提示', responseJson.message);
+				return;
+			}
 			const navigator = this.props.navigator;
 			if(navigator) {
 			//	navigator.pop();
+	//			Alert.alert(API.user_regist_url);
 				navigator.replace({
 					name: 'Login',
-					component: Login
+					component: Login,
+					params: {
+						username: this.state.username
+					}
 				});
 			}
 		})
 		.catch((err) => {
-			Alert.alert(err);	
+		//	Alert.alert(err);	
 		});
 	}
 	

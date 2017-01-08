@@ -19,34 +19,76 @@ import {
   TouchableOpacity,
   Dimensions,
   Navigator,
+  AsyncStorage,
 	
 } from 'react-native';
 
 const {height, width} = Dimensions.get('window');
 
+import API from './API';
 import JokeList from './JokeList';
 import Regist from './Regist';
+import TabBar from './TabBar';
 
+const LOGIN_URL = API.user_login_url;
 
 // http://www.lcode.org/%E3%80%90react-native%E5%BC%80%E5%8F%91%E3%80%91react-native%E6%8E%A7%E4%BB%B6%E4%B9%8Btextinput%E7%BB%84%E4%BB%B6%E8%AE%B2%E8%A7%A3%E4%B8%8Eqq%E7%99%BB%E5%BD%95%E7%95%8C%E9%9D%A2%E5%AE%9E%E7%8E%B011/
 class Login extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			username: '',
+			isLogin: global.isLogin,
+			// username默认值是从注册页面跳转带入
+			username: this.props.username,
 			password: '',
 		}
+	}
+	
+	componentDidMount() {
+		var self = this;
+		AsyncStorage.getItem('USER_INFO', function(error, result) {
+			if(result) {
+				self.state.isLogin = true;
+				const navigator = self.props.navigator;
+				if(navigator) {
+				//	navigator.pop();
+					navigator.replace({
+						name: 'TabBar',
+						component: TabBar
+					});
+				}
+				return;				
+			}
+		});
+		
+	}
+	// 获取用户信息判断用户是否登录
+	getUserInfo() {
+		
 	}
 
 	// 用户名
 	onChangeUsernameValue(event) {
 		this.setState({username: event.nativeEvent.text});
-		console.log('password-->' + this.state.username);
 	}
 	// 密码
 	onChangePasswordValue(event) {
 		this.setState({password: event.nativeEvent.text});
-		console.log('password-->' + this.state.password);
+	}
+	
+	// 保存用户信息
+	saveUserInfo(user) {
+		var USER_INFO = 'USER_INFO';
+		try {
+			global.isLogin = true; // 设置全局变量
+			AsyncStorage.setItem(USER_INFO, user, function(error) {
+				if(error) {
+					Alert('err', '存储失败');
+				}
+			});
+		} catch(error) {
+			
+		}
 	}
 	
 	// 用户登录
@@ -62,7 +104,7 @@ class Login extends Component {
 			return;
 		}
 		
-		fetch('http://115.28.145.105:3000/users/login', 
+		fetch(LOGIN_URL, 
 		{	method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
@@ -70,14 +112,22 @@ class Login extends Component {
 			body: 'username='+username+'&password='+password
 		}).then((response) => response.json())
 		.then((responseJson) => {
-		//	Alert.alert(JSON.stringify(responseJson) );	
+		//	Alert.alert('result', JSON.stringify(responseJson.data[0]) );	
+		//	return;
+			if(responseJson.code !== 1) {
+				Alert.alert('登录失败', responseJson.message);
+				return;
+			}
+			
+		//	console.log(responseJson.data[0].id);
+			this.saveUserInfo(JSON.stringify(responseJson.data[0]));
 			//  登录成功
 			const navigator = this.props.navigator;
 			if(navigator) {
 			//	navigator.pop();
 				navigator.replace({
-					name: 'JokeList',
-					component: JokeList
+					name: 'TabBar',
+					component: TabBar
 				});
 			}
 		})
@@ -102,6 +152,17 @@ class Login extends Component {
 	}
 
 	render() {
+		if(this.state.isLogin) {
+			const navigator = this.props.navigator;
+			if(navigator) {
+			//	navigator.pop();
+				navigator.replace({
+					name: 'TabBar',
+					component: TabBar
+				});
+			}
+			return;
+		}
 		return(
 			<View style={styles.container}>
 				<View style={styles.login}>
@@ -109,7 +170,8 @@ class Login extends Component {
 					style={styles.username}
 					autoFocus={true}
 					onChange={this.onChangeUsernameValue.bind(this)}
-					value={this.state.username}
+				//	value={this.state.username}
+					defaultValue={this.props.username} // 默认值是从注册页面跳转带入
 					placeholder={'登录名'}
 					placeholderTextColor={'#45a7ff'}
 					underlineColorAndroid={'transparent'}
